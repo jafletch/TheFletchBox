@@ -1,4 +1,4 @@
-﻿import struct
+import struct
 import serial
 import threading
 import time
@@ -15,16 +15,16 @@ axisX = 0
 axisY = 1
 axisZ = 2
 
-port1 = 0x10
-port2 = 0x20
-port3 = 0x30
-port4 = 0x40
-port5 = 0x50
-port6 = 0x60
-port7 = 0x70
-port8 = 0x80
-m1 = 0x90
-m2 = 0xA0
+port1 = 0x01
+port2 = 0x02
+port3 = 0x03
+port4 = 0x04
+port5 = 0x05
+port6 = 0x06
+port7 = 0x07
+port8 = 0x08
+m1 = 0x09
+m2 = 0x0A
 I2C =  0xB0
 DIGIPORT = 0xC0
 ALOGPORT = 0xD0
@@ -67,6 +67,10 @@ class serialRead(threading.Thread):
     def run(self):
         while True:
             l = ser.readline()
+            s = ''
+            for b in l:
+                s = s + hex(ord(b))
+            print s
             parsePackage(map(ord,l))
 
 def b2f(s,pos_start):
@@ -203,7 +207,7 @@ def doLimitSwitch(port):
 
 def doTemperature(port,slot):
     index = appendModule(TEMPERATURE_SENSOR,port,slot,0)
-    t = temperatureSensor(port, slot)
+    t = temperatureSensor(portEnum[port], slotEnum[slot])
     ser.write(t.getTemp())
     return moduleList[index]["value"][0]
 
