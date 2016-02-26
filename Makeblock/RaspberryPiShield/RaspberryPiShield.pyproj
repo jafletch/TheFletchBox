@@ -29,6 +29,9 @@
     <Compile Include="devices.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="deviceset.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="packetbuilder.py">
       <SubType>Code</SubType>
     </Compile>
@@ -36,7 +39,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="rpi_serial.py" />
-    <Compile Include="serial_packet.py">
+    <Compile Include="packets.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

@@ -1,10 +1,15 @@
-﻿import config
+﻿from abc import ABCMeta
 
-class serial_packet(object):
-    """description of class"""
+import config
+
+class serialpacket():
+
+    __metaclass__ = ABCMeta
 
     PACKETSTART = [255, 85]
 
+class requestpacket(serialpacket):
+    
     def __init__(self, index, action, device, port, slot = None, data = None):
         self.index = index
         self.action = config.action.validate(action)
@@ -23,7 +28,7 @@ class serial_packet(object):
             if self.data != None:
                 length = length + len(self.data)
         bytes = bytearray()
-        bytes.extend(serial_packet.PACKETSTART)
+        bytes.extend(serialpacket.PACKETSTART)
         bytes.append(length)
         bytes.append(self.index)
         bytes.append(self.action)
@@ -36,3 +41,21 @@ class serial_packet(object):
 
         return bytes
         
+class responsepacket(serialpacket):
+
+    def __init__(self, bytes):
+        packetlen = len(bytes)
+        if packetlen < 2 or bytes[0] != self.PACKETSTART[0] or bytes[1] != self.PACKETSTART[1]:
+            raise PacketError("Packet is too short or does not contain start sequence")
+        if packetlen >= 3:
+            self.index = bytes[2]
+        else:
+            self.index = None
+        if packetlen > 3:
+            self.data = bytes[3:]
+        else:
+            self.data = None
+
+class PacketError(Exception):
+    def __init__(self, message):
+        super(PacketError, self).__init__(message)

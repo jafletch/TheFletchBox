@@ -1,10 +1,11 @@
-import struct
+﻿import struct
 import serial
 import threading
 import time
 
 from devices import *
 from config import *
+from deviceset import *
 
 rxbuff=bytearray()
 
@@ -60,6 +61,8 @@ PWM_OUTPUT = 34
 
 moduleList = [] #{port:port2,slot:slot1,module:module}
 
+set = deviceset()
+
 class serialRead(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
@@ -71,7 +74,9 @@ class serialRead(threading.Thread):
             for b in l:
                 s = s + hex(ord(b))
             print s
-            parsePackage(map(ord,l))
+            bytes = map(ord,l)
+            set.handleResponse(bytes)
+            parsePackage(bytes)
 
 def b2f(s,pos_start):
     d =bytearray(s[pos_start:pos_start+4])
@@ -208,8 +213,9 @@ def doLimitSwitch(port):
 def doTemperature(port,slot):
     index = appendModule(TEMPERATURE_SENSOR,port,slot,0)
     t = temperatureSensor(portEnum[port], slotEnum[slot])
-    ser.write(t.getTemp())
-    return moduleList[index]["value"][0]
+    set.addDevice(t)
+    ser.write(t.requestTemp())
+    return t.latestValue()
 
 def doLightSensor(port,slot):
     index = appendModule(LIGHT_SENSOR,port,"Slot1",0)
