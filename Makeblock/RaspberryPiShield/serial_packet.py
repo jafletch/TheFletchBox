@@ -1,4 +1,4 @@
-import config
+﻿import config
 
 class serial_packet(object):
     """description of class"""
@@ -33,11 +33,6 @@ class serial_packet(object):
             bytes.append(self.slot)
         if self.data != None:
             bytes.extend(self.data)
-
-        s = ''
-        for b in bytes:
-            s = s + hex(b)
-        print s
 
         return bytes
         
