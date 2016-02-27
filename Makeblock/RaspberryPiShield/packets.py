@@ -27,33 +27,37 @@ class requestpacket(serialpacket):
             length = length + 1
             if self.data != None:
                 length = length + len(self.data)
-        bytes = bytearray()
-        bytes.extend(serialpacket.PACKETSTART)
-        bytes.append(length)
-        bytes.append(self.index)
-        bytes.append(self.action)
-        bytes.append(self.device)
-        bytes.append(self.port)
+        b = bytearray()
+        b.extend(serialpacket.PACKETSTART)
+        b.append(length)
+        b.append(self.index)
+        b.append(self.action)
+        b.append(self.device)
+        b.append(self.port)
         if self.slot != None:
-            bytes.append(self.slot)
+            b.append(self.slot)
         if self.data != None:
-            bytes.extend(self.data)
+            b.extend(self.data)
 
-        return bytes
+        return b
         
 class responsepacket(serialpacket):
 
-    def __init__(self, bytes):
-        packetlen = len(bytes)
-        if packetlen < 2 or bytes[0] != self.PACKETSTART[0] or bytes[1] != self.PACKETSTART[1]:
-            raise PacketError("Packet is too short or does not contain start sequence")
+    def __init__(self, byts):
+        b = byts[:2]
+        self.valid = True
+        packetlen = len(b)
+        if packetlen < 2 or b[0] != self.PACKETSTART[0] or b[1] != self.PACKETSTART[1]:
+            self.valid = False
         if packetlen >= 3:
-            self.index = bytes[2]
+            self.index = b[2]
         else:
             self.index = None
         if packetlen > 3:
-            self.data = bytes[3:]
+            self.datatype = b[3]
+            self.data = byts[4:]
         else:
+            self.datatype = None
             self.data = None
 
 class PacketError(Exception):

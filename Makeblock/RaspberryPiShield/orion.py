@@ -31,6 +31,10 @@ class orion(object):
 
     def handleResponse(self, bytes):
         response = responsepacket(bytes)
+        # skip invalid packets
+        if not response.valid:
+            return
+
         (portNumber, slotNumber) = orion.__unpackIndex(response.index)
         responsePort = self.__ports[portNumber]
         if responsePort.occupied:

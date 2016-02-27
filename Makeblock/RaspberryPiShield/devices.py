@@ -46,5 +46,5 @@ class temperatureSensor(slotteddevice):
 
     def parseData(self, data):
         if len(data) != 4:
-            raise PacketError("Expected 4 bytes of data returned. Got: " + len(data))
+            raise PacketError("Expected 4 bytes of data returned. Got: " + atr(len(data)))
         self.__value = self.bytesToFloat(data, 0)
