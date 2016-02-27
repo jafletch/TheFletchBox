@@ -62,17 +62,17 @@ class orion(board):
         self.motor1 = port(self, config.port.MOTOR_1)
         self.motor2 = port(self, config.port.MOTOR_2)
         ports = {
-                        config.port.PORT_1 : self.port1,
-                        config.port.PORT_2 : self.port2,
-                        config.port.PORT_3 : self.port3,
-                        config.port.PORT_4 : self.port4,
-                        config.port.PORT_5 : self.port5,
-                        config.port.PORT_6 : self.port6,
-                        config.port.PORT_7 : self.port7,
-                        config.port.PORT_8 : self.port8,
-                        config.port.MOTOR_1 : self.motor1,
-                        config.port.MOTOR_2 : self.motor2,
-                       }
+                    config.port.PORT_1 : self.port1,
+                    config.port.PORT_2 : self.port2,
+                    config.port.PORT_3 : self.port3,
+                    config.port.PORT_4 : self.port4,
+                    config.port.PORT_5 : self.port5,
+                    config.port.PORT_6 : self.port6,
+                    config.port.PORT_7 : self.port7,
+                    config.port.PORT_8 : self.port8,
+                    config.port.MOTOR_1 : self.motor1,
+                    config.port.MOTOR_2 : self.motor2,
+                }
 
         super(orion, self).__init__(ports)
 
