@@ -20,16 +20,36 @@ class serialReader(threading.Thread):
 class board():
     __metaclass__ = ABCMeta
 
-    def __init__(self, dataHandler):
-        ser = serial.Serial('/dev/ttyAMA0', 115200)
-        th = serialReader(dataHandler)
+    @staticmethod
+    def __unpackIndex(byte):
+        return (byte & 15, byte >> 4 & 15)
+
+    def __init__(self, ports):
+
+        self.__ports = ports
+
+        self.__serialReader = serial.Serial('/dev/ttyAMA0', 115200)
+        th = serialReader(self.handleResponse)
         th.setDaemon(True)
         th.start()
+
+    def handleResponse(self, bytes):
+        response = responsepacket(bytes)
+        # skip invalid packets
+        if not response.valid:
+            return
+
+        (portNumber, slotNumber) = board.__unpackIndex(response.index)
+        responsePort = self.__ports[portNumber]
+        if responsePort.occupied:
+            responsePort.getDevice(slotNumber).parseData(response.data)
+
+    def sendRequest(self, requestPacket):
+        self.__serialReader.write(requestPacket)
 
 class orion(board):
     
     def __init__(self):
-        super(orion, self).__init__(self.handleResponse)
         self.port1 = port(self, config.port.PORT_1)
         self.port2 = port(self, config.port.PORT_2)
         self.port3 = port(self, config.port.PORT_3)
@@ -40,7 +60,7 @@ class orion(board):
         self.port8 = port(self, config.port.PORT_8)
         self.motor1 = port(self, config.port.MOTOR_1)
         self.motor2 = port(self, config.port.MOTOR_2)
-        self.__ports = {
+        ports = {
                         config.port.PORT_1 : self.port1,
                         config.port.PORT_2 : self.port2,
                         config.port.PORT_3 : self.port3,
@@ -53,20 +73,7 @@ class orion(board):
                         config.port.MOTOR_2 : self.motor2,
                        }
 
-    def handleResponse(self, bytes):
-        response = responsepacket(bytes)
-        # skip invalid packets
-        if not response.valid:
-            return
-
-        (portNumber, slotNumber) = orion.__unpackIndex(response.index)
-        responsePort = self.__ports[portNumber]
-        if responsePort.occupied:
-            responsePort.getDevice(slotNumber).parseData(response.data)
-
-    @staticmethod
-    def __unpackIndex(byte):
-        return (byte & 15, byte >> 4 & 15)
+        super(orion, self).__init__(ports)
 
 class port(object):
     
@@ -95,8 +102,8 @@ class port(object):
 
         self.__devices.append(device)
 
-        device.port = self.id
-        device.index = device.port
+        device.port = self
+        device.index = device.port.id
         if device.slot != None:
             device.index = device.index + (device.slot << 4)
 
@@ -106,6 +113,9 @@ class port(object):
         for d in self.__devices:
             if d.slot == slot:
                 return d
+
+    def sendRequest(self, requestPacket):
+        self.__board.sendRequest(requestPacket)
 
 class BoardError(Exception):
     def __init__(self, message):
