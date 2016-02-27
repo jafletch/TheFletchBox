@@ -91,10 +91,10 @@ class port(object):
     def addDevice(self, device):
         self.__occupied = True
 
-        if device.slot == None and len(self.__devices) > 0:
+        if not hasattr(device, "slot") and len(self.__devices) > 0:
             raise BoardError("Port %s is already occupied" % str(self.id))
 
-        if device.slot != None:
+        if hasattr(device, "slot") and device.slot != None:
             if len(self.__devices) >= 2:
                 raise BoardError("Port %s is already occupied" % str(self.id))
             for d in self.__devices:
@@ -105,7 +105,7 @@ class port(object):
 
         device.port = self
         device.index = device.port.id
-        if device.slot != None:
+        if hasattr(device, "slot") and device.slot != None:
             device.index = device.index + (device.slot << 4)
 
     def getDevice(self, slot = None):
