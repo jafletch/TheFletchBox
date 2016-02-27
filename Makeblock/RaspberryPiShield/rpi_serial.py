@@ -61,7 +61,7 @@ PWM_OUTPUT = 34
 
 moduleList = [] #{port:port2,slot:slot1,module:module}
 
-set = deviceset()
+set = orion()
 
 class serialRead(threading.Thread):
     def __init__(self):

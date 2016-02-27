@@ -1,13 +1,13 @@
 import config
 from devices import *
-from deviceset import *
+from orion import *
 from packets import responsepacket
 
-t = temperatureSensor(port.PORT_1, slot.SLOT_2)
+t = temperatureSensor(slot.SLOT_2)
 
-set = deviceset()
-set.addDevice(t)
+board = orion()
+board.port1.addDevice(t)
 
-set.handleResponse(bytearray([255, 85, 0, 0, 128, 174, 65]))
+board.handleResponse(bytearray([255, 85, 33, 0, 128, 174, 65]))
 
 print t.latestValue()

@@ -29,7 +29,7 @@
     <Compile Include="devices.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="deviceset.py">
+    <Compile Include="orion.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="packetbuilder.py">

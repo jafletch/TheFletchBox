@@ -10,10 +10,10 @@ class simpledevice():
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, deviceType, modulePort):
+    def __init__(self, deviceType):
         self.device = device.validate(deviceType)
+        self.port = None
         self.index = None
-        self.port = port.validate(modulePort)
 
     @abstractmethod
     def parseData(self, data):
@@ -28,14 +28,14 @@ class slotteddevice(simpledevice):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, deviceType, modulePort, moduleSlot):
-        super(slotteddevice, self).__init__(deviceType, modulePort)
+    def __init__(self, deviceType, moduleSlot):
+        super(slotteddevice, self).__init__(deviceType)
         self.slot = slot.validate(moduleSlot)
 
 class temperatureSensor(slotteddevice):
 
-    def __init__(self, modulePort, moduleSlot):
-        super(temperatureSensor, self).__init__(device.TEMPERATURE_SENSOR, modulePort, moduleSlot)
+    def __init__(self, moduleSlot):
+        super(temperatureSensor, self).__init__(device.TEMPERATURE_SENSOR, moduleSlot)
         self.__value = -1
 
     def requestTemp(self):
