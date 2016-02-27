@@ -46,12 +46,14 @@ class responsepacket(serialpacket):
     def __init__(self, byts):
         b = byts[:-2]
         self.valid = True
+        self.OkPacket = False
         packetlen = len(b)
         if packetlen < 2 or b[0] != self.PACKETSTART[0] or b[1] != self.PACKETSTART[1]:
             self.valid = False
         if packetlen >= 3:
             self.index = b[2]
         else:
+            self.OkPacket = True
             self.index = None
         if packetlen > 3:
             self.datatype = b[3]

@@ -37,7 +37,7 @@ class board():
     def handleResponse(self, byts):
         response = responsepacket(byts)
         # skip invalid packets
-        if not response.valid:
+        if not response.valid or response.OkPacket:
             return
 
         (portNumber, slotNumber) = board.__unpackIndex(response.index)
