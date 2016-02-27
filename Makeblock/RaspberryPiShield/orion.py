@@ -1,11 +1,35 @@
+from abc import ABCMeta
 import config
 from devices import *
 import exceptions
 from packets import responsepacket
+import serial
+import threading
 
-class orion(object):
+class board():
+    __metaclass__ = ABCMeta
+
+    def __init__(self, dataHandler):
+        ser = serial.Serial('/dev/ttyAMA0', 115200)
+        th = serialRead(dataHandler)
+        th.setDaemon(True)
+        th.start()
+
+    class serialRead(threading.Thread):
+        
+        def __init__(self, dataHandler):
+            threading.Thread.__init__(self)
+            self.dataHandler = dataHandler
+    
+        def run(self):
+            while True:
+                line = ser.readline()
+                self.dataHandler(map(ord,line))
+
+class orion(board):
     
     def __init__(self):
+        super(orion, self).__init__(self.handleResponse)
         self.port1 = port(self, config.port.PORT_1)
         self.port2 = port(self, config.port.PORT_2)
         self.port3 = port(self, config.port.PORT_3)
