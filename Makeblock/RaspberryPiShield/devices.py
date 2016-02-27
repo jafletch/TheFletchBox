@@ -39,7 +39,7 @@ class temperatureSensor(slotteddevice):
         self.__value = -1
 
     def requestTemp(self):
-        return requestpacket(self.index, action.GET, self.device, self.port, self.slot).toByteArray()
+        self.port.sendRequest(requestpacket(self.index, action.GET, self.device, self.port.id, self.slot))
 
     def latestValue(self):
         return self.__value

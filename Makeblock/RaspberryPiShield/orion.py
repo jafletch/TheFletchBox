@@ -8,13 +8,14 @@ import threading
 
 class serialReader(threading.Thread):
         
-    def __init__(self, dataHandler):
+    def __init__(self, serialPort, dataHandler):
         threading.Thread.__init__(self)
         self.dataHandler = dataHandler
+        self.serialPort = serialPort
     
     def run(self):
         while True:
-            line = ser.readline()
+            line = self.serialPort.readline()
             self.dataHandler(map(ord,line))
 
 class board():
@@ -28,13 +29,13 @@ class board():
 
         self.__ports = ports
 
-        self.__serialReader = serial.Serial('/dev/ttyAMA0', 115200)
-        th = serialReader(self.handleResponse)
+        self.__serialPort = serial.Serial('/dev/ttyAMA0', 115200)
+        th = serialReader(self.__serialPort, self.handleResponse)
         th.setDaemon(True)
         th.start()
 
-    def handleResponse(self, bytes):
-        response = responsepacket(bytes)
+    def handleResponse(self, byts):
+        response = responsepacket(byts)
         # skip invalid packets
         if not response.valid:
             return
@@ -45,7 +46,7 @@ class board():
             responsePort.getDevice(slotNumber).parseData(response.data)
 
     def sendRequest(self, requestPacket):
-        self.__serialReader.write(requestPacket)
+        self.__serialPort.write(requestPacket.toByteArray())
 
 class orion(board):
     
