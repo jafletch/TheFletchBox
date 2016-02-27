@@ -6,25 +6,25 @@ from packets import responsepacket
 import serial
 import threading
 
+class serialReader(threading.Thread):
+        
+    def __init__(self, dataHandler):
+        threading.Thread.__init__(self)
+        self.dataHandler = dataHandler
+    
+    def run(self):
+        while True:
+            line = ser.readline()
+            self.dataHandler(map(ord,line))
+
 class board():
     __metaclass__ = ABCMeta
 
     def __init__(self, dataHandler):
         ser = serial.Serial('/dev/ttyAMA0', 115200)
-        th = serialRead(dataHandler)
+        th = serialReader(dataHandler)
         th.setDaemon(True)
         th.start()
-
-    class serialRead(threading.Thread):
-        
-        def __init__(self, dataHandler):
-            threading.Thread.__init__(self)
-            self.dataHandler = dataHandler
-    
-        def run(self):
-            while True:
-                line = ser.readline()
-                self.dataHandler(map(ord,line))
 
 class orion(board):
     
