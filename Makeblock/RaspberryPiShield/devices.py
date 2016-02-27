@@ -55,6 +55,9 @@ class lightAndGrayscaleSensor(simpledevice):
     def requestValue(self):
         self.port.sendRequest(requestpacket(self.index, action.GET, self.device, self.port.id))
 
+    def toggleLight(self):
+        self.port.sendRequest(requestpacket(self.index, action.RUN, self.device, self.port.id))
+
     def latestValue(self):
         return self.__value
 
@@ -79,3 +82,20 @@ class ultrasonicSensor(simpledevice):
         if len(data) != 4:
             raise PacketError("Expected 4 bytes of data returned. Got: " + str(len(data)))
         self.__value = self.bytesToFloat(data, 0)
+
+class sevenSegmentDisplay(simpledevice):
+
+    def __init__(self):
+        super(sevenSegmentDisplay, self).__init__(device.SEVSEG)
+        self.__value = -1
+
+    def setValue(self, float):
+        byts = []
+        byts.append(float >> 24 & 255)
+        byts.append(float >> 16 & 255)
+        byts.append(float >> 8 & 255)
+        byts.append(float & 255)
+        self.port.sendRequest(requestpacket(self.index, action.run, self.device, self.port.id, data= byts))
+
+    def parseData(self, data):
+        raise PacketError("7 segment display should never receive data")
