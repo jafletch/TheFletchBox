@@ -1,4 +1,4 @@
-﻿from abc import ABCMeta
+from abc import ABCMeta
 
 import config
 
@@ -23,7 +23,7 @@ class requestpacket(serialpacket):
 
     def toByteArray(self):
         length = 4
-        if self.slot != None:
+        if self.slot != None or self.data != None:
             length = length + 1
             if self.data != None:
                 length = length + len(self.data)
@@ -36,6 +36,8 @@ class requestpacket(serialpacket):
         b.append(self.port)
         if self.slot != None:
             b.append(self.slot)
+        elif self.data != None:
+            b.append(0)
         if self.data != None:
             b.extend(self.data)
 

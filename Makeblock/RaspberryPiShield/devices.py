@@ -89,13 +89,8 @@ class sevenSegmentDisplay(simpledevice):
         super(sevenSegmentDisplay, self).__init__(device.SEVSEG)
         self.__value = -1
 
-    def setValue(self, float):
-        byts = []
-        byts.append(float >> 24 & 255)
-        byts.append(float >> 16 & 255)
-        byts.append(float >> 8 & 255)
-        byts.append(float & 255)
-        self.port.sendRequest(requestpacket(self.index, action.run, self.device, self.port.id, data= byts))
+    def setValue(self, fl):
+        self.port.sendRequest(requestpacket(self.index, action.RUN, self.device, self.port.id, data= struct.pack("1f",fl)))
 
     def parseData(self, data):
         raise PacketError("7 segment display should never receive data")
