@@ -49,7 +49,8 @@ class readabledevice():
 class temperatureSensor(slotteddevice, readabledevice):
 
     def __init__(self, moduleSlot):
-        super(temperatureSensor, self).__init__(device.TEMPERATURE_SENSOR, moduleSlot)
+        slotteddevice.__init_(self, moduleSlot)
+        readabledevice.__init__(self)
 
     def parseData(self, data):
         if len(data) != 4:
