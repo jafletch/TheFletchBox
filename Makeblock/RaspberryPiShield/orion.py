@@ -19,7 +19,7 @@ class serialReader(threading.Thread):
     def run(self):
         while True:
             lineMap = map(ord, self.serialPort.readline())
-            log.debug('Data received: ' + lineMap)
+            log.debug('Data received: ' + str(lineMap))
             self.dataHandler(lineMap)
 
 class board():
@@ -42,8 +42,12 @@ class board():
     def handleResponse(self, byts):
         response = responsepacket(byts)
         # skip invalid packets
-        if not response.valid or response.OkPacket:
+        if not response.valid:
             log.debug('Skipping invalid packet')
+            return
+
+        if response.OkPacket:
+            log.debug('Received OK packet')
             return
 
         (portNumber, slotNumber) = board.__unpackIndex(response.index)
@@ -126,7 +130,7 @@ class port(object):
                 return d
 
     def sendRequest(self, requestPacket):
-        log.debug('Sending request from port ' + str(self.id))
+        log.debug('Sending request for port ' + str(self.id))
         self.__board.sendRequest(requestPacket)
 
 class BoardError(Exception):

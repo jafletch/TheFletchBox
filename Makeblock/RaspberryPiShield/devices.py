@@ -55,8 +55,11 @@ class lightAndGrayscaleSensor(simpledevice):
     def requestValue(self):
         self.port.sendRequest(requestpacket(self.index, action.GET, self.device, self.port.id))
 
-    def toggleLight(self):
-        self.port.sendRequest(requestpacket(self.index, action.RUN, self.device, self.port.id))
+    def lightOn(self):
+        self.port.sendRequest(requestpacket(self.index, action.RUN, self.device, self.port.id, data=[1]))
+
+    def lightOff(self):
+        self.port.sendRequest(requestpacket(self.index, action.RUN, self.device, self.port.id, data=[0]))
 
     def latestValue(self):
         return self.__value
