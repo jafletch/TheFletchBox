@@ -2,9 +2,12 @@ from abc import ABCMeta
 import config
 from devices import *
 import exceptions
+import logging
 from packets import responsepacket
 import serial
 import threading
+
+log = logging.getLogger("orion")
 
 class serialReader(threading.Thread):
         
@@ -15,8 +18,9 @@ class serialReader(threading.Thread):
     
     def run(self):
         while True:
-            line = self.serialPort.readline()
-            self.dataHandler(map(ord,line))
+            lineMap = map(ord, self.serialPort.readline())
+            log.debug('Data received: ' + lineMap)
+            self.dataHandler(lineMap)
 
 class board():
     __metaclass__ = ABCMeta
@@ -30,6 +34,7 @@ class board():
         self.__ports = ports
 
         self.__serialPort = serial.Serial('/dev/ttyAMA0', 115200)
+        log.info("Begin serial port read")
         th = serialReader(self.__serialPort, self.handleResponse)
         th.setDaemon(True)
         th.start()
@@ -38,12 +43,16 @@ class board():
         response = responsepacket(byts)
         # skip invalid packets
         if not response.valid or response.OkPacket:
+            log.debug('Skipping invalid packet')
             return
 
         (portNumber, slotNumber) = board.__unpackIndex(response.index)
         responsePort = self.__ports[portNumber]
         if responsePort.occupied:
+            log.debug('Sending packet to port %s, slot %s' % (str(portNumber), str(slotNumber)))
             responsePort.getDevice(slotNumber).parseData(response.data)
+        else:
+            log.error('No handler found for data at port %s, slot %s' % (str(portNumber), str(slotNumber)))
 
     def sendRequest(self, requestPacket):
         self.__serialPort.write(requestPacket.toByteArray())
@@ -89,6 +98,7 @@ class port(object):
         return self.__occupied
 
     def addDevice(self, device):
+        log.info('%s added to port %s' % (type(device).__name__, str(self.id)))
         self.__occupied = True
 
         if not hasattr(device, "slot") and len(self.__devices) > 0:
@@ -116,6 +126,7 @@ class port(object):
                 return d
 
     def sendRequest(self, requestPacket):
+        log.debug('Sending request from port ' + str(self.id))
         self.__board.sendRequest(requestPacket)
 
 class BoardError(Exception):
