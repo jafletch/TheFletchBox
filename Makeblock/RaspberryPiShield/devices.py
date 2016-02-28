@@ -34,13 +34,14 @@ class readabledevice():
     __metaclass__ = ABCMeta
 
     def __init__(self):
-        self.__value = -1
+        return
 
     def requestValue(self):
         self.port.sendRequest(requestpacket(self.index, action.GET, self.device, self.port.id, self.slot))
-
+        
+    @abstractmethod
     def latestValue(self):
-        return self.__value
+        return -1
 
     @abstractmethod
     def parseData(self, data):
@@ -49,8 +50,12 @@ class readabledevice():
 class temperatureSensor(slotteddevice, readabledevice):
 
     def __init__(self, moduleSlot):
-        slotteddevice.__init_(self, moduleSlot)
+        slotteddevice.__init__(self, device.TEMPERATURE_SENSOR, moduleSlot)
         readabledevice.__init__(self)
+        self.__value = -1
+
+    def latestValue(self):
+        return self.__value
 
     def parseData(self, data):
         if len(data) != 4:
@@ -61,12 +66,16 @@ class lightAndGrayscaleSensor(simpledevice, readabledevice):
 
     def __init__(self):
         super(lightAndGrayscaleSensor, self).__init__(device.LIGHT_SENSOR)
+        self.__value = -1
         
     def lightOn(self):
         self.port.sendRequest(requestpacket(self.index, action.RUN, self.device, self.port.id, data=[1]))
 
     def lightOff(self):
         self.port.sendRequest(requestpacket(self.index, action.RUN, self.device, self.port.id, data=[0]))
+
+    def latestValue(self):
+        return self.__value
 
     def parseData(self, data):
         if len(data) != 4:
@@ -77,6 +86,10 @@ class ultrasonicSensor(simpledevice, readabledevice):
 
     def __init__(self):
         super(ultrasonicSensor, self).__init__(device.ULTRASONIC_SENSOR)
+        self.__value = -1
+
+    def latestValue(self):
+        return self.__value
 
     def parseData(self, data):
         if len(data) != 4:
@@ -87,8 +100,7 @@ class sevenSegmentDisplay(simpledevice):
 
     def __init__(self):
         super(sevenSegmentDisplay, self).__init__(device.SEVSEG)
-        self.__value = -1
-
+      
     def setValue(self, fl):
         self.port.sendRequest(requestpacket(self.index, action.RUN, self.device, self.port.id, data= struct.pack("1f",fl)))
 
