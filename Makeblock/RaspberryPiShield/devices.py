@@ -21,8 +21,8 @@ class simpledevice():
         f = struct.unpack("1f",str(d))[0]
         return f
 
-    def bytesToChar(self, s, pos_start):
-        d =bytearray(s[pos_start:pos_start+4])
+    def bytesToBool(self, s, pos_start):
+        d =bytearray(s[pos_start:pos_start+1])
         c = struct.unpack("1c",str(d))[0]
         return c
 
@@ -111,7 +111,7 @@ class pirMotionSensor(simpledevice, readabledevice):
     def parseData(self, data):
         if len(data) != 1:
             raise PacketError("Expected 1 bytes of data returned. Got: " + str(len(data)))
-        self._value = self.bytesToChar(data, 0)
+        self._value = self.bytesToBool(data, 0)
 
 class potentiometer(simpledevice, readabledevice):
 
