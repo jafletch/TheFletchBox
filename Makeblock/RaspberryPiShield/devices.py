@@ -54,6 +54,17 @@ class readabledevice():
     def parseData(self, data):
         return None
 
+class lightSensor(simpledevice, readabledevice):
+
+    def __init__(self):
+        simpledevice.__init__(self, device.LIGHT_SENSOR)
+        readabledevice.__init__(self)
+        
+    def parseData(self, data):
+        if len(data) != 4:
+            raise PacketError("Expected 4 bytes of data returned. Got: " + str(len(data)))
+        self._value = self.bytesToFloat(data, 0)
+
 class lightAndGrayscaleSensor(simpledevice, readabledevice):
 
     def __init__(self):
@@ -81,6 +92,26 @@ class lineFollower(simpledevice, readabledevice):
         if len(data) != 4:
             raise PacketError("Expected 4 bytes of data returned. Got: " + str(len(data)))
         self._value = self.bytesToFloat(data, 0)
+
+class pirMotionSensor(simpledevice, readabledevice):
+
+    MOTION_MODE_RETRIGGERABLE = 1
+    MOTION_MODE_UNREPEATABLE = 0
+
+    def __init__(self):
+        simpledevice.__init__(self, device.PIRMOTION)
+        readabledevice.__init__(self)
+        
+    def setModeToRetriggerable(self):
+        self.port.sendRequest(requestpacket(self.index, action.RUN, self.device, self.port.id, data=[pirMotionSensor.MOTION_MODE_RETRIGGERABLE]))
+
+    def setModeToUnrepeatable(self):
+        self.port.sendRequest(requestpacket(self.index, action.RUN, self.device, self.port.id, data=[pirMotionSensor.MOTION_MODE_UNREPEATABLE]))
+        
+    def parseData(self, data):
+        if len(data) != 1:
+            raise PacketError("Expected 1 bytes of data returned. Got: " + str(len(data)))
+        self._value = self.bytesToChar(data, 0)
 
 class potentiometer(simpledevice, readabledevice):
 
@@ -115,26 +146,9 @@ class temperatureSensor(slotteddevice, readabledevice):
             raise PacketError("Expected 4 bytes of data returned. Got: " + str(len(data)))
         self._value = self.bytesToFloat(data, 0)
 
-class touchSensor(simpledevice, readabledevice):
-
-    def __init__(self):
-        simpledevice.__init__(self, device.TOUCH_SENSOR)
-        readabledevice.__init__(self)
-        
-    def setModeToToggle(self):
-        self.port.sendRequest(requestpacket(self.index, action.RUN, self.device, self.port.id, data=[1]))
-
-    def setModeToDirect(self):
-        self.port.sendRequest(requestpacket(self.index, action.RUN, self.device, self.port.id, data=[0]))
-        
-    def parseData(self, data):
-        if len(data) != 1:
-            raise PacketError("Expected 1 bytes of data returned. Got: " + str(len(data)))
-        self._value = self.bytesToChar(data, 0)
-
 class soundSensor(simpledevice, readabledevice):
 
-    def __init__(self, moduleSlot):
+    def __init__(self):
         simpledevice.__init__(self, device.SOUND_SENSOR)
         readabledevice.__init__(self)
 
