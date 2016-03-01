@@ -27,7 +27,7 @@ while True:
     tempSensor.requestValue()
 
     curTemp = tempSensor.latestValue()
-    if temp != lastTemp:
+    if curTemp != lastTemp:
         sevSeg.setValue(curTemp)
 
     time.sleep(0.5)
