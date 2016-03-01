@@ -18,7 +18,8 @@ class serialReader(threading.Thread):
     
     def run(self):
         while True:
-            lineMap = map(ord, self.serialPort.readline())
+            line = self.serialPort.readline()
+            lineMap = map(ord, line)
             log.debug('Data received: ' + str(lineMap))
             self.dataHandler(lineMap)
 
@@ -29,11 +30,11 @@ class board():
     def __unpackIndex(byte):
         return (byte & 15, byte >> 4 & 15)
 
-    def __init__(self, ports):
+    def __init__(self, ports, serialPort = None):
 
         self.__ports = ports
 
-        self.__serialPort = serial.Serial('/dev/ttyAMA0', 115200)
+        self.__serialPort = serialPort or serial.Serial('/dev/ttyAMA0', 115200)
         log.info("Begin serial port read")
         th = serialReader(self.__serialPort, self.handleResponse)
         th.setDaemon(True)
@@ -63,7 +64,7 @@ class board():
 
 class orion(board):
     
-    def __init__(self):
+    def __init__(self, serialPort = None):
         self.port1 = port(self, config.port.PORT_1)
         self.port2 = port(self, config.port.PORT_2)
         self.port3 = port(self, config.port.PORT_3)
@@ -87,7 +88,7 @@ class orion(board):
                     config.port.MOTOR_2 : self.motor2,
                 }
 
-        super(orion, self).__init__(ports)
+        super(orion, self).__init__(ports, serialPort)
 
 class port(object):
     

@@ -44,6 +44,7 @@ class device(validatable):
     ANALOG = 31
     PWM = 32
     SERVO_PIN = 33
+    TOUCH_SENSOR = 34
     STEPPER = 40
     ENCODER = 41
     TIMER = 50

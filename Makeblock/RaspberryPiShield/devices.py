@@ -21,6 +21,11 @@ class simpledevice():
         f = struct.unpack("1f",str(d))[0]
         return f
 
+    def bytesToChar(self, s, pos_start):
+        d =bytearray(s[pos_start:pos_start+4])
+        c = struct.unpack("1c",str(d))[0]
+        return c
+
 class slotteddevice(simpledevice):
 
     __metaclass__ = ABCMeta
@@ -34,67 +39,56 @@ class readabledevice():
     __metaclass__ = ABCMeta
 
     def __init__(self):
-        return
+        self._value = -1
 
     def requestValue(self):
         self.port.sendRequest(requestpacket(self.index, action.GET, self.device, self.port.id, self.slot))
         
-    @abstractmethod
     def latestValue(self):
-        return -1
-
+        return self._value
+    
     @abstractmethod
     def parseData(self, data):
         return None
 
-class temperatureSensor(slotteddevice, readabledevice):
-
-    def __init__(self, moduleSlot):
-        slotteddevice.__init__(self, device.TEMPERATURE_SENSOR, moduleSlot)
-        readabledevice.__init__(self)
-        self.__value = -1
-
-    def latestValue(self):
-        return self.__value
-
-    def parseData(self, data):
-        if len(data) != 4:
-            raise PacketError("Expected 4 bytes of data returned. Got: " + str(len(data)))
-        self.__value = self.bytesToFloat(data, 0)
-
 class lightAndGrayscaleSensor(simpledevice, readabledevice):
 
     def __init__(self):
-        super(lightAndGrayscaleSensor, self).__init__(device.LIGHT_SENSOR)
-        self.__value = -1
+        simpledevice.__init__(self, device.LIGHT_SENSOR)
+        readabledevice.__init__(self)
         
     def lightOn(self):
         self.port.sendRequest(requestpacket(self.index, action.RUN, self.device, self.port.id, data=[1]))
 
     def lightOff(self):
         self.port.sendRequest(requestpacket(self.index, action.RUN, self.device, self.port.id, data=[0]))
-
-    def latestValue(self):
-        return self.__value
-
+        
     def parseData(self, data):
         if len(data) != 4:
             raise PacketError("Expected 4 bytes of data returned. Got: " + str(len(data)))
-        self.__value = self.bytesToFloat(data, 0)
+        self._value = self.bytesToFloat(data, 0)
 
-class ultrasonicSensor(simpledevice, readabledevice):
+class lineFollower(simpledevice, readabledevice):
 
     def __init__(self):
-        super(ultrasonicSensor, self).__init__(device.ULTRASONIC_SENSOR)
-        self.__value = -1
-
-    def latestValue(self):
-        return self.__value
+        simpledevice.__init__(self, device.LINEFOLLOWER)
+        readabledevice.__init__(self)
 
     def parseData(self, data):
         if len(data) != 4:
             raise PacketError("Expected 4 bytes of data returned. Got: " + str(len(data)))
-        self.__value = self.bytesToFloat(data, 0)
+        self._value = self.bytesToFloat(data, 0)
+
+class potentiometer(simpledevice, readabledevice):
+
+    def __init__(self):
+        simpledevice.__init__(self, device.POTENTIONMETER)
+        readabledevice.__init__(self)
+
+    def parseData(self, data):
+        if len(data) != 4:
+            raise PacketError("Expected 4 bytes of data returned. Got: " + str(len(data)))
+        self._value = self.bytesToFloat(data, 0)
 
 class sevenSegmentDisplay(simpledevice):
 
@@ -106,3 +100,53 @@ class sevenSegmentDisplay(simpledevice):
 
     def parseData(self, data):
         raise PacketError("7 segment display should never receive data")
+
+class temperatureSensor(slotteddevice, readabledevice):
+
+    def __init__(self, moduleSlot):
+        slotteddevice.__init__(self, device.TEMPERATURE_SENSOR, moduleSlot)
+        readabledevice.__init__(self)
+
+    def parseData(self, data):
+        if len(data) != 4:
+            raise PacketError("Expected 4 bytes of data returned. Got: " + str(len(data)))
+        self._value = self.bytesToFloat(data, 0)
+
+class touchSensor(simpledevice, readabledevice):
+
+    def __init__(self):
+        simpledevice.__init__(self, device.TOUCH_SENSOR)
+        readabledevice.__init__(self)
+        
+    def setModeToToggle(self):
+        self.port.sendRequest(requestpacket(self.index, action.RUN, self.device, self.port.id, data=[1]))
+
+    def setModeToDirect(self):
+        self.port.sendRequest(requestpacket(self.index, action.RUN, self.device, self.port.id, data=[0]))
+        
+    def parseData(self, data):
+        if len(data) != 1:
+            raise PacketError("Expected 1 bytes of data returned. Got: " + str(len(data)))
+        self._value = self.bytesToChar(data, 0)
+
+class soundSensor(simpledevice, readabledevice):
+
+    def __init__(self, moduleSlot):
+        simpledevice.__init__(self, device.SOUND_SENSOR)
+        readabledevice.__init__(self)
+
+    def parseData(self, data):
+        if len(data) != 4:
+            raise PacketError("Expected 4 bytes of data returned. Got: " + str(len(data)))
+        self._value = self.bytesToFloat(data, 0)
+
+class ultrasonicSensor(simpledevice, readabledevice):
+
+    def __init__(self):
+        simpledevice.__init__(self, device.ULTRASONIC_SENSOR)
+        readabledevice.__init__(self)
+
+    def parseData(self, data):
+        if len(data) != 4:
+            raise PacketError("Expected 4 bytes of data returned. Got: " + str(len(data)))
+        self._value = self.bytesToFloat(data, 0)
