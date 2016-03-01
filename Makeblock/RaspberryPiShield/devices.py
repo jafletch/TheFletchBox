@@ -42,7 +42,10 @@ class readabledevice():
         self._value = -1
 
     def requestValue(self):
-        self.port.sendRequest(requestpacket(self.index, action.GET, self.device, self.port.id, self.slot))
+        slot = None
+        if hasattr(self, 'slot'):
+            slot = self.slot
+        self.port.sendRequest(requestpacket(self.index, action.GET, self.device, self.port.id, slot))
         
     def latestValue(self):
         return self._value
